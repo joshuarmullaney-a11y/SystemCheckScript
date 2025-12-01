@@ -16,19 +16,19 @@ This project demonstrates scripting, monitoring, and system-level engineering pr
 ## 🚀 Features
 
 ### 🔧 Hardware Specs
-- CPU model, number of cores, threads, max clock speed  
-- Total RAM with per-DIMM details (size, speed, vendor)  
-- GPU model, VRAM, and driver version  
+- CPU model, cores, threads, max clock speed  
+- Total RAM + per-DIMM details (size, speed, vendor)  
+- GPU name, VRAM, and driver version  
 
 ### 📈 Live System Metrics
 - CPU usage (averaged over multiple samples)  
-- Memory usage in GB and percentage  
-- Disk usage for each fixed drive  
-- Temperature in °C and °F from ACPI thermal zones  
-- Top **N** processes sorted by CPU time  
+- Memory usage (GB + percentage)  
+- Disk usage for all fixed drives  
+- Temperature (°C/°F) from ACPI thermal zones  
+- Top **N** processes by CPU time  
 
-### 🩺 Health Status Tags  
-All major metrics include health indicators:
+### 🩺 Health Status Tags
+Each metric includes a clear health classification:
 
 | Metric       | WARN Threshold | CRITICAL Threshold |
 |--------------|----------------|--------------------|
@@ -37,73 +37,119 @@ All major metrics include health indicators:
 | Disk Usage   | ≥ 80%          | ≥ 90%              |
 | Temperature  | ≥ 75°C         | ≥ 85°C             |
 
-Status tags mimic the behavior of real monitoring systems (Zabbix, Datadog, Nagios, SCOM).
+These thresholds mimic real monitoring tools (Nagios, Zabbix, Datadog, SCOM).
 
 ---
 
-## 🧠 Why I Built This (Internship-Optimized Explanation)
+## 📋 Example Output (Truncated)
 
-This project was designed to demonstrate practical skills relevant to:
 
-- Systems engineering  
-- Infrastructure monitoring  
-- Windows internals  
-- Performance analysis  
-- PowerShell automation  
+================= System Health Report =================
+Timestamp         : 2025-02-02 14:12:55
+Computer Name     : DESKTOP-12345
 
-It simulates a lightweight diagnostic tool similar to what support engineers, IT admins, or systems engineers build in real environments.
+Hardware Specs     :
+--------------------------------------------------------
+CPU 1            : Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+  Cores/Threads    : 6 cores / 12 threads
+  Max Clock        : 2.60 GHz
 
-For an internship or early-career role, this project shows:
+Total RAM          : 15.89 GB
+  DIMM 1           : 8 GB @ 2667 MHz
+  DIMM 2           : 8 GB @ 2667 MHz
 
-- Ability to query system APIs (CIM/WMI)  
-- Comfort with scripting and tooling  
-- Understanding of system health indicators  
-- Ability to document and structure technical tools  
-- Professional engineering practices such as modular code and thresholds  
+GPU 1              : NVIDIA GeForce GTX 1660 Ti
+  VRAM             : 6144 MB
+  Driver Version   : 31.0.15.xxx
 
----
+--------------------------------------------------------
+CPU Usage (avg)   : 12.34 %  [OK]
+--------------------------------------------------------
+Memory (GB)       : Total=15.89 | Used=4.22 | Free=11.67
+Memory (%)        : Used=26.5 % | Free=73.5 %  [OK]
+--------------------------------------------------------
+Disk Usage:
+  C:  Total=476.94 GB | Used=350.00 GB | Free=126.94 GB (73 % used) [WARN]
+--------------------------------------------------------
+Temperature (ACPI\ThermalZone\TZ00_0) : 47.20 °C / 116.96 °F  [OK]
+--------------------------------------------------------
+Top 5 Processes by CPU Time:
+  1. chrome           CPU(s)=1234.56  WS(MB)=512.34
+  2. code             CPU(s)= 987.65  WS(MB)=750.21
+========================================================
+▶️ Usage
+1. Open PowerShell
+Start → type PowerShell → Run as Administrator (recommended)
 
-## ▶️ Usage
-
-### 1. Open PowerShell  
-Start → type **PowerShell** → Run as Administrator (recommended)
-
-### 2. Allow script execution (if needed)
+2. Allow script execution (if needed)
+powershell
+Copy code
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-### 3. Run the script
+3. Run the script
+powershell
+Copy code
 .\system_health.ps1
+Show more processes:
 
+powershell
+Copy code
+.\system_health.ps1 -TopProcesses 10
 🔍 Implementation Details
-System Inspection via CIM/WMI
-  Win32_Processor — CPU model, cores, threads, clock
-  Win32_ComputerSystem — total memory
-  Win32_PhysicalMemory — DIMM slots
-  Win32_VideoController — GPU information
-  Win32_LogicalDisk — disk usage
+System Inspection (CIM/WMI)
+Win32_Processor
+
+Win32_ComputerSystem
+
+Win32_PhysicalMemory
+
+Win32_VideoController
+
+Win32_LogicalDisk
 
 Runtime Metrics
-  Get-Counter for CPU performance counter
-  Get-Process for top CPU-consuming processes
+Performance counters via Get-Counter
 
-Temperature Monitoring
-  ACPI WMI Class: MSAcpi_ThermalZoneTemperature
-  Conversion:
-    Raw tenths of Kelvin → °C
-    °C → °F
+Process statistics via Get-Process
 
-Status Tagging Logic
-  Get-StatusFromValue -Value $metric -Warn $warnThreshold -Crit $critThreshold
+Temperature via ACPI
+WMI class: MSAcpi_ThermalZoneTemperature
 
+Temperature conversion:
+
+Raw = tenths of Kelvin
+
+°C = (Raw / 10) - 273.15
+
+°F = (°C × 9/5) + 32
+
+Health Status Tagging Logic
+powershell
+Copy code
+Get-StatusFromValue -Value $metric -Warn $warnThreshold -Crit $critThreshold
 🛠 Skills Demonstrated
+PowerShell scripting & automation
 
-This project showcases:
-  PowerShell scripting & automation
-  Hardware inspection via CIM/WMI
-  System monitoring and health evaluation
-  Performance counter usage
-  Process inspection & diagnostics
-  Temperature measurement & sensor interpretation
-  Threshold-based alerting logic
-  Clean scripting practices (modular functions, error handling)
-  Clear documentation / README writing
+CIM/WMI queries for hardware inspection
 
+OS-level monitoring & diagnostics
+
+Temperature and performance counter interpretation
+
+Threshold-based health reporting (OK/WARN/CRITICAL)
+
+Clean, modular scripting design
+
+Error handling & system introspection
+
+📌 Possible Enhancements
+Export output to JSON, CSV, or a log file
+
+Add network connectivity & latency test
+
+Color-coded statuses in terminal
+
+Add -OutputPath parameter for logging
+
+Email or Slack alert integration
+
+Schedule reports using Task Scheduler
